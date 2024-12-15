@@ -37,3 +37,18 @@ func (m *ShortenerDataModel) GetLatest() ([]*Url, error) {
 	}
 	return urls, nil
 }
+
+func (m *ShortenerDataModel) Insert(original string, shortened string, clicks int) (int, error) {
+	statement := `INSERT INTO urls (original_url, shortened_url, clicks) VALUES (?, ?, ?)`
+	result, err := m.DB.Exec(statement, original, shortened, clicks)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(rowsAffected), nil
+}
