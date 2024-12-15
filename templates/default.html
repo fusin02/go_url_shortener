@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/static/css/styles.css" rel="stylesheet" />
+    <title>A Go URL Shortener</title>
+  </head>
+
+  <body
+    class="bg-gradient-to-b from-bg-slate-400 to-bg-white text-slate-800 antialiased dark:bg-slate-900"
+  >
+    <main class="mb-4">
+      <div class="bg-slate-800 pb-6 drop-shadow-md shadow-md">
+        <header
+          class="mx-auto my-auto lg:max-w-8xl lg:w-[70rem] w-full px-4 pt-6 mb-1"
+        >
+          <h1 class="text-4xl font-bold text-left mb-4 text-white">
+            A Go URL Shortener
+          </h1>
+        </header>
+
+        <div
+          class="mx-auto my-auto lg:max-w-8xl lg:w-[70rem] w-full px-4 mt-6 mb-1"
+        >
+          <form
+            id="link-shortener"
+            class="flex flex-col rounded-md border-2 border-slate-800 dark:border-slate-600 p-6 dark:shadow-md shadow-sm rounded-lg bg-slate-700"
+            action="/"
+            method="post"
+          >
+            <div class="grow mb-1">
+              <label>
+                <input
+                  placeholder="Enter a URL to shorten"
+                  type="text"
+                  name="url"
+                  required
+                  class="w-full border-2 rounded-md py-2 dark:placeholder:text-slate-400 px-3 bg-slate-100 transition ease-in-out delay-150 duration-200 hover:bg-slate-200"
+                />
+              </label>
+              {{/* Only display the error field, if there is an error */}} {{ if
+              ne .Error "" }}
+              <div
+                id="url-error"
+                class="mt-3 rounded-md bg-red-800 border-4 border-red-900 text-white pl-4 py-3 font-medium"
+              >
+                Oops! {{ .Error }}
+              </div>
+              {{ end }}
+            </div>
+            <input
+              type="submit"
+              name="submit"
+              value="Shorten URL"
+              class="hover:cursor-pointer flex-none font-medium border-0 border-slate-600 shadow-md hover:shadow-none bg-slate-600 w-full mt-3 text-white px-3 py-4 uppercase rounded-md transition ease-in-out delay-150 duration-200 hover:bg-slate-600 caret-slate-700 focus:ring-4 focus:ring-offset-4 focus:ring-inset"
+            />
+          </form>
+        </div>
+      </div>
+
+      <hr
+        class="w-48 h-1 mx-auto my-4 bg-slate-200 dark:bg-slate-800 border-0 shadow-sm rounded md:my-5 md:mb-5"
+      />
+
+      <div
+        class="mx-auto my-auto lg:max-w-8xl lg:w-[70rem] w-full px-4 mt-3 mb-4"
+      >
+        <table
+          id="shortened-links-table"
+          class="w-full table-fixed rounded-md bg-slate-50 dark:bg-slate-800 border-separate border-spacing-2 border-2 dark:border-0 border-slate-200 shadow-sm"
+        >
+          <thead>
+            <tr>
+              <th
+                class="border border-slate-300 rounded-sm pl-4 text-left bg-slate-200 dark:text-white dark:bg-slate-800 dark:border-0 py-2"
+              >
+                Shortened URL
+              </th>
+              <th
+                class="border border-slate-300 rounded-sm pl-4 text-left bg-slate-200 dark:text-white dark:bg-slate-800 dark:border-0"
+              >
+                Original URL
+              </th>
+              <th
+                class="border border-slate-300 rounded-sm bg-slate-200 dark:text-white dark:bg-slate-800 dark:border-0"
+              >
+                Clicks
+              </th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            {{ if len .UrlData | eq 0 }}
+            <tr>
+              <td
+                colspan="3"
+                class="border border-slate-300 py-2 pl-4 rounded-sm bg-white dark:text-white dark:bg-slate-700 dark:border-0"
+              >
+                No URLs have been shortened, yet. Want to shorten one?
+              </td>
+            </tr>
+            {{ end }} {{/* Iterate over the existing URL data */}} {{ range
+            .UrlData }}
+            <tr>
+              <td
+                class="border border-slate-300 py-2 pl-4 text-left rounded-sm bg-white dark:text-white dark:bg-slate-700 dark:border-0"
+              >
+                <a
+                  href="{{$.BaseUrl }}o/{{ .ShortenedUrl }}"
+                  target="_blank"
+                  class="hover:underline underline-offset-4 decoration-2 decoration-blue-500 dark:decoration-slate-500"
+                  >{{$.BaseUrl }}o/{{ .ShortenedUrl }}</a
+                >
+              </td>
+              <td
+                class="border border-slate-300 py-2 px-4 text-left block rounded-sm bg-white dark:bg-slate-700 dark:border-0"
+              >
+                <div class="truncate" title="{{ .OriginalUrl }}">
+                  {{ .OriginalUrl }}
+                </div>
+              </td>
+              <td
+                class="border border-slate-300 py-2 rounded-sm bg-white dark:text-white dark:bg-slate-700 dark:border-0"
+              >
+                {{ .Clicks | formatClicks }}
+              </td>
+            </tr>
+            {{ end }}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="pl-1 text-sm text-slate-500 text-right">
+                {{ .UrlData | len }} shortened URLs available.
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </main>
+
+    <footer
+      class="mx-auto my-auto lg:max-w-8xl lg:w-[70rem] w-full px-4 mt-2 mb-0 pl-5 lowercase text-slate-400 dark:text-slate-500 text-sm text-center mb-4"
+    >
+      <a
+        href="#"
+        class="hover:underline underline-offset-4 decoration-2 decoration-slate-300 transition ease-in-out delay-150 duration-100"
+      >
+        Created by Matthew Setter.
+      </a>
+      <a
+        href="#"
+        class="hover:underline underline-offset-4 decoration-2 decoration-slate-300 transition ease-in-out delay-150 duration-100"
+      >
+        Powered by Twilio.
+      </a>
+    </footer>
+  </body>
+</html>
