@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 )
 
 type Url struct {
@@ -51,4 +52,31 @@ func (m *ShortenerDataModel) Insert(original string, shortened string, clicks in
 	}
 
 	return int(rowsAffected), nil
+}
+
+func (m *ShortenerDataModel) Get(shortened string) (string, error) {
+	statement := `SELECT original_url FROM urls WHERE shortened_url = ?`
+	var original string
+	row := m.DB.QueryRow(statement, shortened)
+	err := row.Scan(&original)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			var ErrNoRecord = errors.New("models: no matching record found")
+			return "", ErrNoRecord
+		} else {
+			return "", err
+		}
+	}
+
+	return original, nil
+}
+
+func (m *ShortenerDataModel) UpdateClicks(shortened string) error {
+	statement := `UPDATE urls SET clicks = clicks + 1 WHERE shortened_url = ?`
+	_, err := m.DB.Exec(statement, shortened)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
